@@ -1,0 +1,6 @@
+MAE=0.122, RMSE=0.142
+MAE=0.122, RMSE=0.142
+MAE=0.122, RMSE=0.142
+best={'regressor__subsample': 0.7, 'regressor__n_estimators': 150, 'regressor__min_samples_leaf': 2, 'regressor__max_depth': 2, 'regressor__learning_rate': 0.05} | MAE=0.125 | RMSE=0.147 | R2=-0.110
+best={'regressor__subsample': 0.85, 'regressor__n_estimators': 150, 'regressor__min_samples_leaf': 3, 'regressor__max_depth': 3, 'regressor__learning_rate': 0.05} | MAE=0.126 | RMSE=0.147 | R2=-0.106
+best={'regressor__subsample': 0.85, 'regressor__n_estimators': 150, 'regressor__min_samples_leaf': 3, 'regressor__max_depth': 3, 'regressor__learning_rate': 0.05} | MAE=0.126 | RMSE=0.147 | R2=-0.106

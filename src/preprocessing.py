@@ -1,55 +1,83 @@
 from __future__ import annotations
-from typing import Dict, Any, List
-import numpy as np
+from typing import Any, Dict, Iterable
 import pandas as pd
+import numpy as np
 
-def count_list(lst) -> int:
-    return len(lst) if isinstance(lst, list) else 0
+# ---------- Helpers ----------
+def _safe_len(x: Any) -> int:
+    return len(x) if isinstance(x, list) else 0
 
+def _join_text(items: Iterable[Dict[str, Any]], keys=("title", "level", "company")) -> str:
+    """Concatène proprement quelques champs textuels d'une liste d'objets."""
+    if not isinstance(items, list):
+        return ""
+    parts = []
+    for obj in items:
+        if isinstance(obj, dict):
+            for k in keys:
+                v = obj.get(k)
+                if isinstance(v, str) and v.strip():
+                    parts.append(v.strip())
+    return " ".join(parts)
+
+def _combine_text_from_row(row: Dict[str, Any]) -> str:
+    """Texte global pour TF-IDF : description + diplomas + experiences."""
+    desc = row.get("description") or ""
+    dipl_text = _join_text(row.get("diplomas"), keys=("title", "level"))
+    exp_text  = _join_text(row.get("experiences"), keys=("title", "company", "city"))
+    city = row.get("city") or ""
+    return " ".join([str(desc), dipl_text, exp_text, str(city)]).strip()
+
+# ---------- Features pour prédiction (API) ----------
 def build_features_from_row(row: Dict[str, Any]) -> pd.DataFrame:
     """
-    Construit les features minimales attendues par le pipeline :
-    - num_courses, num_diplomas, num_experiences, city
-    Le 'row' est un dict contenant (au minimum) :
-      - pastCourses: List[dict] (optionnel)
-      - diplomas: List[dict] (optionnel)
-      - experiences: List[dict] (optionnel)
-      - city: str (optionnel)
+    Construit exactement les features attendues par le pipeline entraîné :
+      - num_courses, num_diplomas, num_experiences (numériques)
+      - city (catégorielle)
+      - text (TF-IDF)
     """
-    num_courses = count_list(row.get("pastCourses"))
-    num_diplomas = count_list(row.get("diplomas"))
-    num_experiences = count_list(row.get("experiences"))
-    city = row.get("city")
-
     X = pd.DataFrame([{
-        "num_courses": num_courses,
-        "num_diplomas": num_diplomas,
-        "num_experiences": num_experiences,
-        "city": city
+        "num_courses": _safe_len(row.get("pastCourses")),
+        "num_diplomas": _safe_len(row.get("diplomas")),
+        "num_experiences": _safe_len(row.get("experiences")),
+        "city": (row.get("city") or "Unknown"),
+        "text": _combine_text_from_row(row),
     }])
     return X
 
-def build_training_xy(df: pd.DataFrame):
+# ---------- Features + cible pour l'entraînement ----------
+def extract_training_features(df: pd.DataFrame):
     """
-    Construit X, y pour l'entraînement à partir du DataFrame JSON initial.
-    y = moyenne des 'numberOfStars' des 'pastCourses'
+    X :
+      - num_courses / num_diplomas / num_experiences / city / text
+    y :
+      - moyenne des numberOfStars dans pastCourses
     """
-    def extract_avg_rating(row):
-        pcs = row.get("pastCourses", None)
-        if isinstance(pcs, list) and len(pcs) > 0:
-            stars = [c.get("numberOfStars") for c in pcs if isinstance(c, dict) and "numberOfStars" in c]
+    def avg_stars(courses):
+        if isinstance(courses, list) and courses:
+            stars = [c.get("numberOfStars") for c in courses if isinstance(c, dict)]
             stars = [s for s in stars if s is not None]
-            if len(stars) > 0:
+            if stars:
                 return float(np.mean(stars))
         return np.nan
 
+    # Crée les features de base
     X = pd.DataFrame({
-        "num_courses": df.get("pastCourses", []).apply(count_list),
-        "num_diplomas": df.get("diplomas", []).apply(count_list),
-        "num_experiences": df.get("experiences", []).apply(count_list),
-        "city": df.get("city", None)
+        "num_courses": df.get("pastCourses", pd.Series([[]]*len(df))).apply(_safe_len),
+        "num_diplomas": df.get("diplomas", pd.Series([[]]*len(df))).apply(_safe_len),
+        "num_experiences": df.get("experiences", pd.Series([[]]*len(df))).apply(_safe_len),
     })
 
-    y = df.apply(extract_avg_rating, axis=1)
+    # Gestion robuste de la colonne city
+    if "city" in df.columns:
+        X["city"] = df["city"].fillna("Unknown")
+    else:
+        X["city"] = ["Unknown"] * len(df)
+
+    # Ajoute la feature textuelle combinée
+    X["text"] = df.apply(lambda r: _combine_text_from_row(r), axis=1)
+
+    # Crée la cible
+    y = df.apply(lambda r: avg_stars(r.get("pastCourses")), axis=1)
     mask = y.notna()
-    return X[mask], y[mask]
+    return X[mask].reset_index(drop=True), y[mask].reset_index(drop=True)

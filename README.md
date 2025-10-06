@@ -13,3 +13,8 @@ pip install -r requirements.txt
 # data/data_train.json
 
 python -m src.model_training
+
+uvicorn api.app:app --reload --host 0.0.0.0 --port 8000
+
+
+python -m src.model_training
