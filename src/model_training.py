@@ -1,43 +1,51 @@
 import pandas as pd
-from pycaret.regression import setup, compare_models, finalize_model, save_model
+import numpy as np
+import joblib
+from pathlib import Path
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
-# === 1. Charger les données ===
+# === 1. Charger le dataset ===
 df = pd.read_json("data/data_train.json")
 
-# === 2. Construire les features de base ===
+# === 2. Extraire la cible (note moyenne des cours passés) ===
 def extract_avg_rating(row):
     if isinstance(row.get("pastCourses"), list) and len(row["pastCourses"]) > 0:
         stars = [c.get("numberOfStars") for c in row["pastCourses"] if "numberOfStars" in c]
-        if stars:
-            return sum(stars) / len(stars)
-    return None
+        if len(stars) > 0:
+            return np.mean(stars)
+    return np.nan
 
 df["target"] = df.apply(extract_avg_rating, axis=1)
+
+# === 3. Créer des features simples ===
 df["num_courses"] = df["pastCourses"].apply(lambda x: len(x) if isinstance(x, list) else 0)
 df["num_diplomas"] = df["diplomas"].apply(lambda x: len(x) if isinstance(x, list) else 0)
 df["num_experiences"] = df["experiences"].apply(lambda x: len(x) if isinstance(x, list) else 0)
 df["city"] = df["city"].fillna("Unknown")
 
-# === 3. Préparer le jeu de données ===
-data = df[["num_courses", "num_diplomas", "num_experiences", "city", "target"]].dropna()
+# === 4. Garder seulement les colonnes utiles ===
+X = df[["num_courses", "num_diplomas", "num_experiences"]]
+y = df["target"].fillna(df["target"].mean())
 
-# === 4. Configuration PyCaret ===
-s = setup(
-    data=data,
-    target="target",
-    session_id=42,
-    normalize=True,
-    silent=True,
-    verbose=False
-)
+# === 5. Split train/test ===
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# === 5. Comparer et trouver le meilleur modèle ===
-best = compare_models()
+# === 6. Entraîner un modèle ===
+model = RandomForestRegressor(n_estimators=150, random_state=42)
+model.fit(X_train, y_train)
 
-# === 6. Entraîner le modèle final ===
-final_model = finalize_model(best)
+# === 7. Évaluer le modèle ===
+y_pred = model.predict(X_test)
+mae = mean_absolute_error(y_test, y_pred)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
 
-# === 7. Sauvegarder le modèle ===
-save_model(final_model, "models/model_stationF_pycaret")
+print(f"✅ Entraînement terminé !")
+print(f"MAE : {mae:.3f}")
+print(f"RMSE : {rmse:.3f}")
 
-print("✅ Modèle PyCaret entraîné et sauvegardé : models/model_stationF_pycaret.pkl")
+# === 8. Sauvegarder le modèle ===
+Path("models").mkdir(exist_ok=True)
+joblib.dump(model, "models/model_stationF.pkl")
+print("📦 Modèle sauvegardé : models/model_stationF.pkl")
