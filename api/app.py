@@ -1,26 +1,17 @@
 from fastapi import FastAPI
-from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
+from pydantic import BaseModel
 import joblib
-from pathlib import Path
-
+import pandas as pd
 from src.preprocessing import build_features_from_row
 
-app = FastAPI(title="Station F Satisfaction Predictor", version="1.0.0")
-
-MODEL_PATH = Path("models/model_stationF.pkl")
-model = joblib.load(MODEL_PATH)
-
-# --- Schémas d'entrée (souples pour accepter des champs en plus) ---
-class PastCourse(BaseModel):
-    numberOfStars: Optional[float] = None
-    # autres champs ignorés si présents
+app = FastAPI()
+model = joblib.load("models/model_stationF.pkl")
 
 class PredictRequest(BaseModel):
-    city: Optional[str] = None
-    diplomas: Optional[List[Dict[str, Any]]] = None
-    experiences: Optional[List[Dict[str, Any]]] = None
-    pastCourses: Optional[List[PastCourse]] = Field(default=None, description="Historique des cours précédents (optionnel)")
+    city: str | None = None
+    diplomas: list | None = None
+    experiences: list | None = None
+    pastCourses: list | None = None
 
 @app.get("/health")
 def health():
@@ -28,8 +19,9 @@ def health():
 
 @app.post("/predict")
 def predict(req: PredictRequest):
-    # convertir le modèle Pydantic en dict brut
     row = req.model_dump()
     X = build_features_from_row(row)
-    yhat = float(model.predict(X)[0])
-    return {"predicted_score": yhat}
+    # On garde les features utilisées pour l’entraînement
+    X = X[["num_courses", "num_diplomas", "num_experiences"]]
+    y_pred = model.predict(X)
+    return {"predicted_score": float(y_pred[0])}
