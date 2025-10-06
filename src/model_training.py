@@ -1,68 +1,43 @@
-import joblib
 import pandas as pd
-from pathlib import Path
-from sklearn.model_selection import train_test_split
-from sklearn.pipeline import Pipeline
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.impute import SimpleImputer
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_absolute_error, mean_squared_error
-import numpy as np
+from pycaret.regression import setup, compare_models, finalize_model, save_model
 
-from src.preprocessing import build_training_xy
+# === 1. Charger les données ===
+df = pd.read_json("data/data_train.json")
 
-DATA_PATH = Path("data/data_train.json")
-MODEL_DIR = Path("models")
-MODEL_PATH = MODEL_DIR / "model_stationF.pkl"
+# === 2. Construire les features de base ===
+def extract_avg_rating(row):
+    if isinstance(row.get("pastCourses"), list) and len(row["pastCourses"]) > 0:
+        stars = [c.get("numberOfStars") for c in row["pastCourses"] if "numberOfStars" in c]
+        if stars:
+            return sum(stars) / len(stars)
+    return None
 
-def train_and_save():
-    # 1) Chargement
-    df = pd.read_json(DATA_PATH)
-    X, y = build_training_xy(df)
+df["target"] = df.apply(extract_avg_rating, axis=1)
+df["num_courses"] = df["pastCourses"].apply(lambda x: len(x) if isinstance(x, list) else 0)
+df["num_diplomas"] = df["diplomas"].apply(lambda x: len(x) if isinstance(x, list) else 0)
+df["num_experiences"] = df["experiences"].apply(lambda x: len(x) if isinstance(x, list) else 0)
+df["city"] = df["city"].fillna("Unknown")
 
-    # 2) Split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# === 3. Préparer le jeu de données ===
+data = df[["num_courses", "num_diplomas", "num_experiences", "city", "target"]].dropna()
 
-    # 3) Pipeline
-    num_features = ["num_courses", "num_diplomas", "num_experiences"]
-    cat_features = ["city"]
+# === 4. Configuration PyCaret ===
+s = setup(
+    data=data,
+    target="target",
+    session_id=42,
+    normalize=True,
+    silent=True,
+    verbose=False
+)
 
-    numeric_transformer = Pipeline(steps=[
-        ("imputer", SimpleImputer(strategy="median"))
-    ])
+# === 5. Comparer et trouver le meilleur modèle ===
+best = compare_models()
 
-    categorical_transformer = Pipeline(steps=[
-        ("imputer", SimpleImputer(strategy="most_frequent")),
-        ("onehot", OneHotEncoder(handle_unknown="ignore"))
-    ])
+# === 6. Entraîner le modèle final ===
+final_model = finalize_model(best)
 
-    preprocess = ColumnTransformer(
-        transformers=[
-            ("num", numeric_transformer, num_features),
-            ("cat", categorical_transformer, cat_features),
-        ],
-        remainder="drop"
-    )
+# === 7. Sauvegarder le modèle ===
+save_model(final_model, "models/model_stationF_pycaret")
 
-    model = Pipeline(steps=[
-        ("preprocess", preprocess),
-        ("regressor", RandomForestRegressor(n_estimators=200, random_state=42))
-    ])
-
-    # 4) Train
-    model.fit(X_train, y_train)
-
-    # 5) Eval
-    y_pred = model.predict(X_test)
-    mae = mean_absolute_error(y_test, y_pred)
-    rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-
-    MODEL_DIR.mkdir(parents=True, exist_ok=True)
-    joblib.dump(model, MODEL_PATH)
-
-    print("✅ Modèle entraîné et sauvegardé :", MODEL_PATH.as_posix())
-    print(f"MAE: {mae:.3f} | RMSE: {rmse:.3f}")
-
-if __name__ == "__main__":
-    train_and_save()
+print("✅ Modèle PyCaret entraîné et sauvegardé : models/model_stationF_pycaret.pkl")
