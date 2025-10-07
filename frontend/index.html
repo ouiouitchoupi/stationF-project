@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Station F - Prédiction de Satisfaction</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <h1>🔮 Prédiction de satisfaction enseignant</h1>
+    <p>Remplis le profil complet du professeur et du cours pour une prédiction fiable.</p>
+
+    <form id="predictForm" class="container">
+
+        <!-- SECTION PROFIL -->
+        <section>
+            <h2>👨‍🏫 Profil du professeur</h2>
+            <label>Nom complet</label>
+            <input id="name" placeholder="Jean Dupont" required>
+
+            <label>Ville</label>
+            <select id="city">
+                <option>Paris</option>
+                <option>Lyon</option>
+                <option>Marseille</option>
+                <option>Toulouse</option>
+            </select>
+
+            <label>Description</label>
+            <textarea id="description" rows="3"
+                placeholder="Décrivez le style ou l'approche du professeur..."></textarea>
+        </section>
+
+        <!-- SECTION DIPLÔMES -->
+        <section id="diplomasSection">
+            <h2>🎓 Diplômes</h2>
+            <div id="diplomasContainer"></div>
+            <button type="button" class="add-btn" id="addDiplomaBtn">+ Ajouter un diplôme</button>
+        </section>
+
+        <!-- SECTION EXPÉRIENCES -->
+        <section id="experiencesSection">
+            <h2>🏫 Expériences professionnelles</h2>
+            <div id="experiencesContainer"></div>
+            <button type="button" class="add-btn" id="addExperienceBtn">+ Ajouter une expérience</button>
+        </section>
+
+        <!-- SECTION COURS PASSÉS -->
+        <section>
+            <h2>📚 Cours passés</h2>
+            <label>Titre du cours</label>
+            <select id="pastCourseTitle">
+                <option value="Programmation Python">Programmation Python</option>
+                <option value="Développement Web avec React">Développement Web avec React</option>
+                <option value="Algorithmes et Structures de Données">Algorithmes et Structures de Données</option>
+            </select>
+
+            <label>Note moyenne reçue</label>
+            <input type="number" id="avgStars" min="3.0" max="5.0" step="0.1" value="4.5">
+        </section>
+
+        <!-- SECTION COURS À PRÉDIRE -->
+        <section>
+            <h2>📖 Cours à prédire</h2>
+            <label>Titre du cours</label>
+            <select id="predictCourseTitle">
+                <option>Développement Web avec React</option>
+                <option>Programmation Python</option>
+                <option>Analyse Mathématique</option>
+                <option>Langue Française</option>
+            </select>
+
+            <label>Description</label>
+            <textarea id="predictCourseDesc" rows="3" placeholder="Décrivez le contenu du cours à venir..."></textarea>
+        </section>
+
+        <button type="submit" class="submit-btn">🔮 Prédire la note</button>
+
+        <div id="loader">⏳ Calcul en cours...</div>
+        <div id="result"></div>
+
+    </form>
+
+    <script src="/static/app.js"></script>
+</body>
+
+</html>
