@@ -2,22 +2,20 @@
 <html lang="fr">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Station F - Prédiction de Satisfaction</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/styles.css" />
 </head>
 
 <body>
     <h1>🔮 Prédiction de satisfaction enseignant</h1>
-    <p>Remplis le profil complet du professeur et du cours pour une prédiction fiable.</p>
+    <p>Remplis les informations ou génère un profil aléatoire pour tester la prédiction.</p>
 
     <form id="predictForm" class="container">
 
-        <!-- SECTION PROFIL -->
+        <!-- 👨‍🏫 PROFIL DU PROFESSEUR -->
         <section>
             <h2>👨‍🏫 Profil du professeur</h2>
-            <label>Nom complet</label>
-            <input id="name" placeholder="Jean Dupont" required>
 
             <label>Ville</label>
             <select id="city">
@@ -25,61 +23,86 @@
                 <option>Lyon</option>
                 <option>Marseille</option>
                 <option>Toulouse</option>
+                <option>Bordeaux</option>
+                <option>Grenoble</option>
             </select>
 
-            <label>Description</label>
+            <label>Domaine d’enseignement principal</label>
+            <select id="domain">
+                <option value="informatique">Informatique</option>
+                <option value="maths">Mathématiques</option>
+                <option value="français">Français</option>
+                <option value="physique">Physique</option>
+                <option value="chimie">Chimie</option>
+                <option value="histoire">Histoire</option>
+            </select>
+
+            <label>Description du professeur</label>
             <textarea id="description" rows="3"
-                placeholder="Décrivez le style ou l'approche du professeur..."></textarea>
+                placeholder="Décrivez le style ou l’approche du professeur..."></textarea>
         </section>
 
-        <!-- SECTION DIPLÔMES -->
+        <!-- 🎓 DIPLÔMES -->
         <section id="diplomasSection">
             <h2>🎓 Diplômes</h2>
             <div id="diplomasContainer"></div>
             <button type="button" class="add-btn" id="addDiplomaBtn">+ Ajouter un diplôme</button>
         </section>
 
-        <!-- SECTION EXPÉRIENCES -->
+        <!-- 🏫 EXPÉRIENCES -->
         <section id="experiencesSection">
             <h2>🏫 Expériences professionnelles</h2>
             <div id="experiencesContainer"></div>
             <button type="button" class="add-btn" id="addExperienceBtn">+ Ajouter une expérience</button>
         </section>
 
-        <!-- SECTION COURS PASSÉS -->
+        <!-- 📚 COURS PASSÉS -->
         <section>
             <h2>📚 Cours passés</h2>
-            <label>Titre du cours</label>
+            <label>Titre du cours passé</label>
             <select id="pastCourseTitle">
-                <option value="Programmation Python">Programmation Python</option>
-                <option value="Développement Web avec React">Développement Web avec React</option>
-                <option value="Algorithmes et Structures de Données">Algorithmes et Structures de Données</option>
+                <option>Programmation Python</option>
+                <option>Développement Web avec React</option>
+                <option>Algèbre Linéaire</option>
+                <option>Analyse Mathématique</option>
+                <option>Grammaire Française</option>
+                <option>Physique Quantique</option>
+                <option>Chimie Organique</option>
+                <option>Histoire Moderne</option>
             </select>
 
             <label>Note moyenne reçue</label>
-            <input type="number" id="avgStars" min="3.0" max="5.0" step="0.1" value="4.5">
+            <input type="number" id="avgStars" min="1.0" max="5.0" step="0.1" value="4.5" />
         </section>
 
-        <!-- SECTION COURS À PRÉDIRE -->
+        <!-- 📖 COURS À PRÉDIRE -->
         <section>
             <h2>📖 Cours à prédire</h2>
-            <label>Titre du cours</label>
+
+            <label>Titre du cours à venir</label>
             <select id="predictCourseTitle">
-                <option>Développement Web avec React</option>
                 <option>Programmation Python</option>
+                <option>Développement Web avec React</option>
                 <option>Analyse Mathématique</option>
                 <option>Langue Française</option>
+                <option>Thermodynamique</option>
+                <option>Chimie des matériaux</option>
+                <option>Révolution Française</option>
             </select>
 
-            <label>Description</label>
-            <textarea id="predictCourseDesc" rows="3" placeholder="Décrivez le contenu du cours à venir..."></textarea>
+            <label>Description du cours</label>
+            <textarea id="predictCourseDesc" rows="3"
+                placeholder="Décrivez brièvement le contenu du cours..."></textarea>
         </section>
 
-        <button type="submit" class="submit-btn">🔮 Prédire la note</button>
+        <!-- 🔘 BOUTONS -->
+        <div style="display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+            <button type="button" class="add-btn" id="randomProfileBtn">🎲 Générer un profil aléatoire</button>
+            <button type="submit" class="submit-btn">🔮 Prédire la note</button>
+        </div>
 
         <div id="loader">⏳ Calcul en cours...</div>
         <div id="result"></div>
-
     </form>
 
     <script src="/static/app.js"></script>

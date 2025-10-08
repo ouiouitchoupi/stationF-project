@@ -1,0 +1,422 @@
+[
+    {
+        "professorId": 1,
+        "description": "Professeur passionné de programmation et d'intelligence artificielle. 10 ans d'expérience dans le développement web et la data science.",
+        "city": "Paris",
+        "diplomas": [
+            {
+                "title": "Master Informatique",
+                "level": "Master"
+            },
+            {
+                "title": "Doctorat en Intelligence Artificielle",
+                "level": "Doctorat"
+            }
+        ],
+        "experiences": [
+            {
+                "title": "Formateur Python",
+                "company": "École 42"
+            },
+            {
+                "title": "Data Scientist",
+                "company": "Capgemini"
+            }
+        ],
+        "pastCourses": [
+            {
+                "title": "Programmation Python",
+                "numberOfStars": 4.9
+            },
+            {
+                "title": "Deep Learning appliqué",
+                "numberOfStars": 4.7
+            }
+        ]
+    },
+    {
+        "professorId": 2,
+        "description": "Enseignant en développement web, spécialisé en React et JavaScript. Expérience dans la conception d'applications full-stack.",
+        "city": "Lyon",
+        "diplomas": [
+            {
+                "title": "Licence Informatique",
+                "level": "Licence"
+            },
+            {
+                "title": "Master Développement Logiciel",
+                "level": "Master"
+            }
+        ],
+        "experiences": [
+            {
+                "title": "Développeur Front-End",
+                "company": "Sopra Steria"
+            },
+            {
+                "title": "Formateur JavaScript",
+                "company": "Université de Lyon"
+            }
+        ],
+        "pastCourses": [
+            {
+                "title": "Développement Web avec React",
+                "numberOfStars": 4.6
+            },
+            {
+                "title": "Programmation JavaScript",
+                "numberOfStars": 4.5
+            }
+        ]
+    },
+    {
+        "professorId": 3,
+        "description": "Professeur de mathématiques appliquées, passionné par les statistiques et la modélisation. Approche pédagogique axée sur la compréhension logique.",
+        "city": "Toulouse",
+        "diplomas": [
+            {
+                "title": "Master Mathématiques Appliquées",
+                "level": "Master"
+            },
+            {
+                "title": "Doctorat en Statistiques",
+                "level": "Doctorat"
+            }
+        ],
+        "experiences": [
+            {
+                "title": "Chercheur en statistiques",
+                "company": "Université de Toulouse"
+            },
+            {
+                "title": "Enseignant en analyse",
+                "company": "INSA Toulouse"
+            }
+        ],
+        "pastCourses": [
+            {
+                "title": "Analyse mathématique avancée",
+                "numberOfStars": 4.8
+            },
+            {
+                "title": "Probabilités et Statistiques",
+                "numberOfStars": 4.9
+            }
+        ]
+    },
+    {
+        "professorId": 4,
+        "description": "Enseignant en mathématiques et algorithmique, formateur en logique et raisonnement scientifique.",
+        "city": "Marseille",
+        "diplomas": [
+            {
+                "title": "Licence Mathématiques",
+                "level": "Licence"
+            },
+            {
+                "title": "Master en Mathématiques et Informatique",
+                "level": "Master"
+            }
+        ],
+        "experiences": [
+            {
+                "title": "Professeur de Mathématiques",
+                "company": "Université Aix-Marseille"
+            },
+            {
+                "title": "Formateur Algorithmique",
+                "company": "École Centrale Marseille"
+            }
+        ],
+        "pastCourses": [
+            {
+                "title": "Algèbre linéaire",
+                "numberOfStars": 4.5
+            },
+            {
+                "title": "Algorithmique",
+                "numberOfStars": 4.6
+            }
+        ]
+    },
+    {
+        "professorId": 5,
+        "description": "Professeur de littérature française et de linguistique, passionnée par la poésie et la culture francophone.",
+        "city": "Paris",
+        "diplomas": [
+            {
+                "title": "Licence Lettres Modernes",
+                "level": "Licence"
+            },
+            {
+                "title": "Master en Linguistique Française",
+                "level": "Master"
+            }
+        ],
+        "experiences": [
+            {
+                "title": "Professeur de Français",
+                "company": "Sorbonne Université"
+            },
+            {
+                "title": "Formatrice en expression écrite",
+                "company": "Université de Paris"
+            }
+        ],
+        "pastCourses": [
+            {
+                "title": "Grammaire avancée",
+                "numberOfStars": 4.8
+            },
+            {
+                "title": "Analyse de texte littéraire",
+                "numberOfStars": 4.9
+            }
+        ]
+    },
+    {
+        "professorId": 6,
+        "description": "Enseignant en littérature et rédaction, spécialisé dans l'analyse de textes modernes et la linguistique appliquée.",
+        "city": "Bordeaux",
+        "diplomas": [
+            {
+                "title": "Licence en Langue et Littérature Française",
+                "level": "Licence"
+            },
+            {
+                "title": "Master en Analyse Littéraire",
+                "level": "Master"
+            }
+        ],
+        "experiences": [
+            {
+                "title": "Professeur de Français",
+                "company": "Université de Bordeaux"
+            },
+            {
+                "title": "Chercheur en linguistique",
+                "company": "CNRS"
+            }
+        ],
+        "pastCourses": [
+            {
+                "title": "Littérature contemporaine",
+                "numberOfStars": 4.7
+            },
+            {
+                "title": "Atelier d'écriture",
+                "numberOfStars": 4.6
+            }
+        ]
+    },
+    {
+        "professorId": 7,
+        "description": "Professeur de physique expérimentale, spécialisé en mécanique et thermodynamique. Utilise des démonstrations pratiques pour ses cours.",
+        "city": "Grenoble",
+        "diplomas": [
+            {
+                "title": "Master Physique",
+                "level": "Master"
+            },
+            {
+                "title": "Doctorat en Énergie et Thermodynamique",
+                "level": "Doctorat"
+            }
+        ],
+        "experiences": [
+            {
+                "title": "Chercheur en énergie",
+                "company": "CEA Grenoble"
+            },
+            {
+                "title": "Professeur de Physique",
+                "company": "Université Grenoble Alpes"
+            }
+        ],
+        "pastCourses": [
+            {
+                "title": "Thermodynamique appliquée",
+                "numberOfStars": 4.8
+            },
+            {
+                "title": "Mécanique des fluides",
+                "numberOfStars": 4.7
+            }
+        ]
+    },
+    {
+        "professorId": 8,
+        "description": "Chercheur et enseignant en physique quantique, avec une approche théorique et expérimentale.",
+        "city": "Paris",
+        "diplomas": [
+            {
+                "title": "Master Physique Fondamentale",
+                "level": "Master"
+            },
+            {
+                "title": "Doctorat en Physique Quantique",
+                "level": "Doctorat"
+            }
+        ],
+        "experiences": [
+            {
+                "title": "Chercheur CNRS",
+                "company": "CNRS"
+            },
+            {
+                "title": "Professeur en Physique",
+                "company": "Université Paris-Saclay"
+            }
+        ],
+        "pastCourses": [
+            {
+                "title": "Optique avancée",
+                "numberOfStars": 4.9
+            },
+            {
+                "title": "Physique quantique",
+                "numberOfStars": 4.8
+            }
+        ]
+    },
+    {
+        "professorId": 9,
+        "description": "Professeur de chimie organique et expérimentale, passionné par les réactions chimiques et la science des matériaux.",
+        "city": "Lille",
+        "diplomas": [
+            {
+                "title": "Licence Chimie",
+                "level": "Licence"
+            },
+            {
+                "title": "Doctorat en Chimie Organique",
+                "level": "Doctorat"
+            }
+        ],
+        "experiences": [
+            {
+                "title": "Chercheur en chimie organique",
+                "company": "Université de Lille"
+            },
+            {
+                "title": "Professeur de Chimie",
+                "company": "INSA Lille"
+            }
+        ],
+        "pastCourses": [
+            {
+                "title": "Chimie des réactions organiques",
+                "numberOfStars": 4.8
+            },
+            {
+                "title": "Science des matériaux",
+                "numberOfStars": 4.7
+            }
+        ]
+    },
+    {
+        "professorId": 10,
+        "description": "Enseignant en chimie et environnement, spécialisé dans l'étude des matériaux et de la pollution atmosphérique.",
+        "city": "Strasbourg",
+        "diplomas": [
+            {
+                "title": "Master Chimie",
+                "level": "Master"
+            },
+            {
+                "title": "Doctorat en Chimie des Matériaux",
+                "level": "Doctorat"
+            }
+        ],
+        "experiences": [
+            {
+                "title": "Chercheur en matériaux",
+                "company": "Université de Strasbourg"
+            },
+            {
+                "title": "Professeur de Chimie",
+                "company": "Université de Strasbourg"
+            }
+        ],
+        "pastCourses": [
+            {
+                "title": "Chimie générale",
+                "numberOfStars": 4.6
+            },
+            {
+                "title": "Chimie des polymères",
+                "numberOfStars": 4.5
+            }
+        ]
+    },
+    {
+        "professorId": 11,
+        "description": "Professeur d'histoire moderne, spécialisé dans la Révolution française et la culture européenne.",
+        "city": "Paris",
+        "diplomas": [
+            {
+                "title": "Licence Histoire",
+                "level": "Licence"
+            },
+            {
+                "title": "Doctorat en Histoire Moderne",
+                "level": "Doctorat"
+            }
+        ],
+        "experiences": [
+            {
+                "title": "Historien",
+                "company": "Musée de l'Histoire de France"
+            },
+            {
+                "title": "Professeur d'Histoire",
+                "company": "Université Paris 1 Panthéon-Sorbonne"
+            }
+        ],
+        "pastCourses": [
+            {
+                "title": "Révolution Française",
+                "numberOfStars": 4.8
+            },
+            {
+                "title": "Histoire de l'Europe",
+                "numberOfStars": 4.7
+            }
+        ]
+    },
+    {
+        "professorId": 12,
+        "description": "Enseignant-chercheur en histoire ancienne, spécialiste de la civilisation romaine et grecque.",
+        "city": "Nice",
+        "diplomas": [
+            {
+                "title": "Master Histoire",
+                "level": "Master"
+            },
+            {
+                "title": "Doctorat en Archéologie",
+                "level": "Doctorat"
+            }
+        ],
+        "experiences": [
+            {
+                "title": "Chercheur en archéologie",
+                "company": "Université de Nice"
+            },
+            {
+                "title": "Professeur d'Histoire",
+                "company": "Université Côte d’Azur"
+            }
+        ],
+        "pastCourses": [
+            {
+                "title": "Civilisation romaine",
+                "numberOfStars": 4.8
+            },
+            {
+                "title": "Histoire antique",
+                "numberOfStars": 4.9
+            }
+        ]
+    }
+]

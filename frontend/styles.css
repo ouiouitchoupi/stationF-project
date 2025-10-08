@@ -1,88 +1,242 @@
+/* ===========================
+   🎨 STYLE GLOBAL
+   =========================== */
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #4b6cb7, #182848);
-  color: white;
+  font-family: "Poppins", "Segoe UI", sans-serif;
+  background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+  color: #ffffff;
   text-align: center;
   padding: 40px;
   min-height: 100vh;
+  margin: 0;
+  background-attachment: fixed;
 }
 
+/* ===========================
+   🧱 CONTENEUR PRINCIPAL
+   =========================== */
 .container {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
-  padding: 30px;
-  max-width: 650px;
-  margin: 30px auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 30px 40px;
+  max-width: 720px;
+  margin: 40px auto;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+}
+
+.container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+/* ===========================
+   🔠 TITRES & TEXTES
+   =========================== */
+h1 {
+  font-size: 2.2em;
+  color: #00f5ff;
+  margin-bottom: 10px;
+}
+
+p {
+  color: #d6e0f0;
+  font-size: 1em;
+  margin-bottom: 30px;
 }
 
 section {
   text-align: left;
-  margin-bottom: 25px;
+  margin-bottom: 35px;
+}
 
-  h2 {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    padding-bottom: 5px;
+section h2 {
+  color: #00f5ff;
+  border-left: 4px solid #00f5ff;
+  padding-left: 10px;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+label {
+  font-weight: 600;
+  display: block;
+  margin-top: 12px;
+  color: #e3f2fd;
+  font-size: 0.95em;
+}
+
+/* ===========================
+   🧩 FORM INPUTS
+   =========================== */
+input,
+select,
+textarea {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+  color: #eaf6ff;
+  font-size: 1em;
+  box-sizing: border-box;
+  transition: all 0.2s ease-in-out;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #00f5ff;
+  box-shadow: 0 0 6px #00f5ff;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+/* ===========================
+   📦 BLOCS DYNAMIQUES (Entrées ajoutées)
+   =========================== */
+.entry {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 10px;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.entry .remove-btn {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: #ff6b6b;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1.3em;
+  transition: 0.2s;
+}
+
+.entry .remove-btn:hover {
+  transform: scale(1.1);
+  color: #ff8787;
+}
+
+/* ===========================
+   🔘 BOUTONS
+   =========================== */
+.add-btn,
+.submit-btn {
+  margin-top: 15px;
+  display: inline-block;
+  background: linear-gradient(90deg, #00c6ff, #0072ff);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  padding: 12px 25px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 114, 255, 0.3);
+}
+
+.add-btn:hover,
+.submit-btn:hover {
+  background: linear-gradient(90deg, #00eaff, #00aaff);
+  box-shadow: 0 6px 15px rgba(0, 114, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+/* ===========================
+   🌀 LOADER & RÉSULTAT
+   =========================== */
+#loader,
+#result {
+  margin-top: 20px;
+  font-size: 1.2em;
+  font-weight: 500;
+  text-align: center;
+}
+
+#loader {
+  color: #00f5ff;
+  display: none;
+}
+
+#result {
+  display: none;
+  background: rgba(0, 255, 204, 0.1);
+  border-radius: 10px;
+  padding: 15px;
+  border: 1px solid rgba(0, 255, 204, 0.4);
+  font-size: 1.1em;
+}
+
+/* ===========================
+   💡 RESPONSIVE DESIGN
+   =========================== */
+@media (max-width: 700px) {
+  body {
+    padding: 20px;
   }
 
-  label {
-    font-weight: bold;
-    display: block;
-    margin-top: 10px;
+  .container {
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 1.6em;
+  }
+
+  section h2 {
+    font-size: 1.1em;
   }
 
   input,
   select,
   textarea {
+    font-size: 0.95em;
+  }
+
+  .add-btn,
+  .submit-btn {
     width: 100%;
-    margin-top: 5px;
-    padding: 8px;
-    border: none;
-    border-radius: 8px;
-    font-size: 1em;
-  }
-
-  .entry {
-    background: rgba(255, 255, 255, 0.15);
-    padding: 10px;
-    border-radius: 8px;
-    margin-top: 10px;
-    position: relative;
-
-    .remove-btn {
-      position: absolute;
-      top: 5px;
-      right: 8px;
-      background: transparent;
-      border: none;
-      color: #ff6666;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 1.2em;
-    }
   }
 }
 
-.add-btn,
-.submit-btn {
-  margin-top: 10px;
-  background: #00c6ff;
-  border: none;
-  border-radius: 8px;
-  color: white;
-  padding: 10px 20px;
-  font-size: 1em;
-  cursor: pointer;
-  transition: 0.3s;
+/* ===========================
+   ✨ ANIMATIONS DÉLICATES
+   =========================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
 
-  &:hover {
-    background: darken(#00c6ff, 10%);
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-#loader,
-#result {
-  margin-top: 20px;
-  font-size: 1.3em;
-  text-align: center;
+.container,
+h1,
+p,
+section {
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.submit-btn:active {
+  transform: scale(0.97);
 }
