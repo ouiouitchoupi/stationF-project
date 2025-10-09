@@ -14,9 +14,12 @@ from src.smart_predictor import (
     extract_domain_from_text,
 )
 
+# ==========================================
+# 🚀 CONFIGURATION DE L'APPLICATION
+# ==========================================
 app = FastAPI(
     title="Station F Satisfaction Predictor",
-    version="4.0",
+    version="5.0",
     openapi_url="/api/openapi.json",
     docs_url="/api/docs"
 )
@@ -29,10 +32,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-MODEL_PATH = Path("models/model_contextual_realistic.pkl")
-model = joblib.load(MODEL_PATH)
+# ==========================================
+# 🤖 CHARGEMENT DU NOUVEAU MODÈLE   
+# ==========================================
+MODEL_PATH = Path("models/model_contextual_randomforest.pkl")
+try:
+    model = joblib.load(MODEL_PATH)
+    print(f"✅ Modèle Random Forest chargé depuis {MODEL_PATH}")
+except Exception as e:
+    model = None
+    print(f"❌ Erreur lors du chargement du modèle : {e}")
 
-# === Schémas ===
+# ==========================================
+# 🧱 SCHÉMAS DE DONNÉES
+# ==========================================
 class Diploma(BaseModel):
     level: str
     title: str
@@ -66,13 +79,19 @@ class PredictionRequest(BaseModel):
     course: Course
 
 
+# ==========================================
+# 🔮 ROUTE DE PRÉDICTION
+# ==========================================
 @app.post("/api/predict")
 def predict(req: PredictionRequest):
+    if model is None:
+        raise HTTPException(status_code=500, detail="Modèle non chargé.")
+
     try:
         prof = req.professor
         course = req.course
 
-        # Texte global du profil
+        # 1️⃣ Texte global du profil
         profile_text = " ".join([
             prof.description,
             " ".join(d.title for d in prof.diplomas),
@@ -80,11 +99,11 @@ def predict(req: PredictionRequest):
             " ".join(c.title for c in prof.pastCourses)
         ])
 
-        # Détection des domaines
+        # 2️⃣ Détection des domaines
         prof_domain = extract_domain_from_text(profile_text)
         course_domain = extract_domain_from_text(course.description)
 
-        # === Features calculées ===
+        # 3️⃣ Calcul des features (alignées avec ton modèle)
         similarity = compute_similarity(profile_text, f"{course.title} {course.description}")
         degree_score = compute_degree_score([d.dict() for d in prof.diplomas])
         prestige_score = compute_prestige_score([e.dict() for e in prof.experiences])
@@ -97,26 +116,32 @@ def predict(req: PredictionRequest):
             "avg_stars": avg_stars,
         }
 
-        # Encodage des domaines
-        for d in ["informatique", "maths", "français", "physique", "chimie", "histoire"]:
-            features[f"prof_domain_{d}"] = 1 if d == prof_domain else 0
-            features[f"course_domain_{d}"] = 1 if d == course_domain else 0
+        # 4️⃣ Encodage des domaines (mêmes noms que dans ton modèle)
+        domains = ["informatique", "maths", "français", "physique", "chimie", "histoire"]
+        for d in domains:
+            features[f"prof_domain_{d}"] = 1 if prof_domain == d else 0
+            features[f"course_domain_{d}"] = 1 if course_domain == d else 0
 
-        # Préparation DataFrame pour modèle
+        # 5️⃣ Préparation du DataFrame (sécurisée)
         X = pd.DataFrame([features])
         for col in model.feature_names_in_:
             if col not in X.columns:
                 X[col] = 0
         X = X[model.feature_names_in_]
 
+        # 6️⃣ Prédiction
         y_pred = model.predict(X)[0]
+        print(f"✅ Prédiction réussie : {y_pred:.2f}")
+
         return {"gradeAverage": round(float(y_pred), 2)}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur de prédiction : {e}")
 
 
-# === FRONTEND ===
+# ==========================================
+# 🖥️ SERVEUR FRONTEND
+# ==========================================
 BASE_DIR = Path(__file__).parent
 frontend_dir = (BASE_DIR / "frontend").resolve()
 app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
