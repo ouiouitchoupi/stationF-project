@@ -42,94 +42,97 @@ print(f"✅ Dataset chargé ({len(df)} lignes)")
 df.head(2)
 
 # ==========================================
-# 🧠 OUTILS D’ANALYSE DE PROFIL
-# ==========================================
-
-DEGREE_LEVEL_SCORES = {
-    "Certificat": 0.7,
-    "Licence": 0.9,
-    "Maîtrise": 1.0,
-    "Master": 1.0,
-    "Doctorat": 1.2,
-}
-
-PRESTIGIOUS_SCHOOLS = [
-    "Polytechnique", "ENS", "Sorbonne", "École 42", "HEC", "CentraleSupélec", "Télécom Paris"
-]
-
-DOMAIN_KEYWORDS = {
-    "informatique": ["programmation", "développement", "python", "web", "java", "react", "c++", "ia", "html", "css"],
-    "maths": ["algèbre", "analyse", "probabilités", "statistiques", "géométrie", "calcul", "modélisation"],
-    "français": ["littérature", "rédaction", "grammaire", "langue", "orthographe", "expression"],
-    "physique": ["électricité", "mécanique", "thermodynamique", "optique"],
-    "chimie": ["molécules", "réactions", "chimique", "matière"],
-    "histoire": ["civilisation", "géographie", "société", "culture", "politique"]
-}
-
-def compute_similarity(text_a: str, text_b: str) -> float:
-    """Similitude TF-IDF simple (corrigé : pas de stop_words='french')"""
-    if not text_a or not text_b:
-        return 0.0
-    vectorizer = TfidfVectorizer(stop_words=None)
-    tfidf = vectorizer.fit_transform([text_a, text_b])
-    return float(cosine_similarity(tfidf[0:1], tfidf[1:2])[0][0])
-
-def compute_degree_score(diplomas: list) -> float:
-    if not diplomas:
-        return 1.0
-    scores = [DEGREE_LEVEL_SCORES.get(d.get("level", ""), 1.0) for d in diplomas]
-    return round(np.mean(scores), 2)
-
-def compute_prestige_score(experiences: list) -> float:
-    if not experiences:
-        return 0.0
-    count = 0
-    for e in experiences:
-        company = e.get("company", "").lower()
-        if any(p.lower() in company for p in PRESTIGIOUS_SCHOOLS):
-            count += 1
-    return round(count / len(experiences), 2)
-
-def extract_domain_from_text(text: str) -> str:
-    text = text.lower()
-    domain_scores = {d: sum(k in text for k in kws) for d, kws in DOMAIN_KEYWORDS.items()}
-    return max(domain_scores, key=domain_scores.get)
-
-# ==========================================
 # 🧩 GÉNÉRATION DE DONNÉES SYNTHÉTIQUES RÉALISTES
 # ==========================================
+
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.metrics import mean_absolute_error, r2_score
+import joblib
+from pathlib import Path
+
+# Domaines et mots-clés
+DOMAIN_KEYWORDS = {
+    "informatique": ["programmation", "développement", "python", "web", "java", "ia", "html", "css"],
+    "maths": ["algèbre", "analyse", "probabilités", "statistiques"],
+    "français": ["littérature", "rédaction", "grammaire", "langue"],
+    "physique": ["électricité", "mécanique", "thermodynamique"],
+    "chimie": ["molécule", "réaction", "chimique", "matière"],
+    "histoire": ["civilisation", "société", "culture", "révolution"]
+}
+
+# === FONCTIONS UTILITAIRES ===
+def compute_similarity(a, b):
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.metrics.pairwise import cosine_similarity
+    if not a or not b:
+        return 0.0
+    vect = TfidfVectorizer()
+    tfidf = vect.fit_transform([a, b])
+    return float(cosine_similarity(tfidf[0:1], tfidf[1:2])[0][0])
+
+DEGREE_LEVEL_SCORES = {
+    "Certificat": 0.7, "Licence": 0.9, "Maîtrise": 1.0, "Master": 1.0, "Doctorat": 1.2
+}
+
+PRESTIGIOUS_SCHOOLS = ["Polytechnique", "Sorbonne", "HEC", "CentraleSupélec", "École 42"]
+
+def compute_degree_score(diplomas):
+    if not diplomas:
+        return 1.0
+    return np.mean([DEGREE_LEVEL_SCORES.get(d.get("level", ""), 1.0) for d in diplomas])
+
+def compute_prestige_score(experiences):
+    if not experiences:
+        return 1.0
+    scores = [1.2 if any(s in e.get("company", "") for s in PRESTIGIOUS_SCHOOLS) else 1.0 for e in experiences]
+    return np.mean(scores)
+
+def extract_domain_from_text(text):
+    text = text.lower()
+    for d, words in DOMAIN_KEYWORDS.items():
+        if any(w in text for w in words):
+            return d
+    return "autre"
+
+# === GÉNÉRATION SYNTHÉTIQUE ===
+df = pd.read_json("data_train_nettoye.json")
 
 def simulate_course_pairings(df):
     simulated = []
     for _, prof in df.iterrows():
-        base = prof.to_dict()
+        desc = prof.get("description", "")
+        diplomas = prof.get("diplomas", [])
+        experiences = prof.get("experiences", [])
+        pastCourses = prof.get("pastCourses", [])
         profile_text = " ".join([
-            base.get("description", ""),
-            " ".join(d.get("title", "") for d in base.get("diplomas", [])),
-            " ".join(e.get("title", "") for e in base.get("experiences", []))
+            desc,
+            " ".join(d.get("title", "") for d in diplomas),
+            " ".join(e.get("title", "") for e in experiences),
+            " ".join(c.get("title", "") for c in pastCourses)
         ])
+
         prof_domain = extract_domain_from_text(profile_text)
+        avg_stars = np.mean([c.get("numberOfStars", 4.0) for c in pastCourses])
 
-        # Générer une combinaison pour chaque domaine possible
-        for domain_name, keywords in DOMAIN_KEYWORDS.items():
+        for course_domain, keywords in DOMAIN_KEYWORDS.items():
             course_text = " ".join(keywords)
-            sim = compute_similarity(profile_text, course_text)
-
-            # Base de la note : forte si domaines identiques, sinon basse
-            base_note = 4.6 if domain_name == prof_domain else 2.7
-            note = base_note + np.random.normal(0, 0.3)  # petit bruit aléatoire réaliste
-            note = max(1.0, min(5.0, note))
+            similarity = compute_similarity(profile_text, course_text)
+            base_note = 4.5 if course_domain == prof_domain else 2.7
+            note = np.clip(base_note + np.random.normal(0, 0.3), 1.0, 5.0)
 
             simulated.append({
-                "professorId": base.get("professorId"),
+                "professor_id": prof.get("professor_id", None),
                 "prof_domain": prof_domain,
-                "course_domain": domain_name,
-                "similarity": sim,
-                "degree_score": compute_degree_score(base.get("diplomas", [])),
-                "prestige_score": compute_prestige_score(base.get("experiences", [])),
-                "n_experiences": len(base.get("experiences", [])),
-                "n_diplomas": len(base.get("diplomas", [])),
-                "avg_stars": np.mean([c.get("numberOfStars", 4.0) for c in base.get("pastCourses", [])]),
+                "course_domain": course_domain,
+                "similarity": similarity,
+                "degree_score": compute_degree_score(diplomas),
+                "prestige_score": compute_prestige_score(experiences),
+                "n_experiences": len(experiences),
+                "n_diplomas": len(diplomas),
+                "avg_stars": avg_stars,
                 "target": round(note, 2)
             })
     return pd.DataFrame(simulated)
@@ -142,136 +145,85 @@ synthetic_df.head()
 # 🧮 ENTRAÎNEMENT DU MODÈLE CONTEXTUEL
 # ==========================================
 
-# Encodage des domaines de cours et prof
 synthetic_df = pd.get_dummies(synthetic_df, columns=["prof_domain", "course_domain"])
 
-X = synthetic_df.drop(columns=["target", "professorId"])
+X = synthetic_df.drop(columns=["target", "professor_id"])
 y = synthetic_df["target"]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-model = GradientBoostingRegressor(n_estimators=400, learning_rate=0.05, max_depth=5, random_state=42)
+model = GradientBoostingRegressor(
+    n_estimators=400, learning_rate=0.05, max_depth=5, random_state=42
+)
 model.fit(X_train, y_train)
+
 y_pred = model.predict(X_test)
+print(f"✅ MAE = {mean_absolute_error(y_test, y_pred):.3f}, R² = {r2_score(y_test, y_pred):.3f}")
 
-mae = mean_absolute_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
-print(f"✅ Modèle entraîné : MAE={mae:.3f}, R²={r2:.3f}")
-
-joblib.dump(model, "model_contextual_realistic.pkl")
-print("📦 Modèle sauvegardé : model_contextual_realistic.pkl")
+joblib.dump(model, "models/model_contextual_realistic.pkl")
+print("📦 Modèle sauvegardé dans models/model_contextual_realistic.pkl")
 
 # ==========================================
-# 🔮 SIMULATION : PROF DE FRANÇAIS SUR COURS PYTHON
+# 🔮 SIMULATION : PROF D’INFORMATIQUE SUR COURS DE FRANÇAIS
 # ==========================================
 
-prof_français = {
-    "professorId": 999,
-    "description": "Professeur de littérature française passionné par la grammaire et la poésie.",
+prof = {
+    "fistname": "Jean-Luc",
+    "lastname": "Bernard",
+    "city": "Paris",
+    "description": "Formateur expérimenté en développement web et programmation.",
     "diplomas": [
-        {"title": "Licence Lettres Modernes", "level": "Licence"},
-        {"title": "Master en Linguistique", "level": "Master"}
+        {"title": "Master en Informatique", "level": "Master"},
+        {"title": "Licence en Informatique", "level": "Licence"}
     ],
     "experiences": [
-        {"title": "Professeur de Français", "company": "Sorbonne Université"},
-        {"title": "Chercheur en linguistique", "company": "Université de Lyon"}
+        {"title": "Professeur d'Informatique", "company": "Université de Lyon"},
+        {"title": "Formateur Web", "company": "École 42"}
     ],
     "pastCourses": [
-        {"title": "Grammaire avancée", "numberOfStars": 4.8},
-        {"title": "Analyse de texte littéraire", "numberOfStars": 4.7}
+        {"title": "Programmation Python", "description": "Cours de base sur Python.", "numberOfStars": 4.7},
+        {"title": "Développement Web avec React", "description": "Cours pratique sur React.", "numberOfStars": 4.6}
     ]
 }
 
-# Construire la ligne de features correspondante
+course = {
+    "title": "Analyse Littéraire et Rédaction",
+    "description": "Cours de langue et d’analyse de textes littéraires français."
+}
+
+# Construction du profil complet
 profile_text = " ".join([
-    prof_français["description"],
-    " ".join(d["title"] for d in prof_français["diplomas"]),
-    " ".join(e["title"] for e in prof_français["experiences"])
+    prof["description"],
+    " ".join(d["title"] for d in prof["diplomas"]),
+    " ".join(e["title"] for e in prof["experiences"]),
+    " ".join(c["title"] for c in prof["pastCourses"])
 ])
 
 prof_domain = extract_domain_from_text(profile_text)
-course_domain = "informatique"
-similarity = compute_similarity(profile_text, " ".join(DOMAIN_KEYWORDS[course_domain]))
+course_domain = extract_domain_from_text(course["description"])
+similarity = compute_similarity(profile_text, f"{course['title']} {course['description']}")
 
 features = {
     "similarity": similarity,
-    "degree_score": compute_degree_score(prof_français["diplomas"]),
-    "prestige_score": compute_prestige_score(prof_français["experiences"]),
-    "n_experiences": len(prof_français["experiences"]),
-    "n_diplomas": len(prof_français["diplomas"]),
-    "avg_stars": np.mean([c["numberOfStars"] for c in prof_français["pastCourses"]]),
+    "degree_score": compute_degree_score(prof["diplomas"]),
+    "prestige_score": compute_prestige_score(prof["experiences"]),
+    "n_experiences": len(prof["experiences"]),
+    "n_diplomas": len(prof["diplomas"]),
+    "avg_stars": np.mean([c["numberOfStars"] for c in prof["pastCourses"]])
 }
 
-# One-hot du domaine
 for d in DOMAIN_KEYWORDS.keys():
     features[f"prof_domain_{d}"] = 1 if d == prof_domain else 0
     features[f"course_domain_{d}"] = 1 if d == course_domain else 0
 
-# Prédiction
 X_pred = pd.DataFrame([features])
 for col in model.feature_names_in_:
     if col not in X_pred.columns:
         X_pred[col] = 0
 X_pred = X_pred[model.feature_names_in_]
 
-pred_score = model.predict(X_pred)[0]
-print(f"⭐ Note prédite pour un prof de {prof_domain} enseignant {course_domain} : {round(pred_score, 2)}/5")
-
-# ==========================================
-# ⚡ SIMULATION : PROF DE PHYSIQUE SUR COURS DE FRANÇAIS
-# ==========================================
-
-prof_physique = {
-    "professorId": 1001,
-    "description": "Professeur de physique expérimentale spécialisé en mécanique et thermodynamique. Passionné par la vulgarisation scientifique.",
-    "diplomas": [
-        {"title": "Master Physique", "level": "Master"},
-        {"title": "Doctorat en Énergie et Thermodynamique", "level": "Doctorat"}
-    ],
-    "experiences": [
-        {"title": "Chercheur en énergie", "company": "CEA Grenoble"},
-        {"title": "Professeur de Physique", "company": "Université Grenoble Alpes"}
-    ],
-    "pastCourses": [
-        {"title": "Thermodynamique appliquée", "numberOfStars": 4.8},
-        {"title": "Mécanique des fluides", "numberOfStars": 4.7}
-    ]
-}
-
-# Construire la ligne de features correspondante
-profile_text = " ".join([
-    prof_physique["description"],
-    " ".join(d["title"] for d in prof_physique["diplomas"]),
-    " ".join(e["title"] for e in prof_physique["experiences"])
-])
-
-prof_domain = extract_domain_from_text(profile_text)
-course_domain = "français"
-similarity = compute_similarity(profile_text, " ".join(DOMAIN_KEYWORDS[course_domain]))
-
-features = {
-    "similarity": similarity,
-    "degree_score": compute_degree_score(prof_physique["diplomas"]),
-    "prestige_score": compute_prestige_score(prof_physique["experiences"]),
-    "n_experiences": len(prof_physique["experiences"]),
-    "n_diplomas": len(prof_physique["diplomas"]),
-    "avg_stars": np.mean([c["numberOfStars"] for c in prof_physique["pastCourses"]]),
-}
-
-# One-hot du domaine
-for d in DOMAIN_KEYWORDS.keys():
-    features[f"prof_domain_{d}"] = 1 if d == prof_domain else 0
-    features[f"course_domain_{d}"] = 1 if d == course_domain else 0
-
-# Prédiction
-X_pred = pd.DataFrame([features])
-for col in model.feature_names_in_:
-    if col not in X_pred.columns:
-        X_pred[col] = 0
-X_pred = X_pred[model.feature_names_in_]
-
-pred_score = model.predict(X_pred)[0]
-print(f"⭐ Note prédite pour un prof de {prof_domain} enseignant {course_domain} : {round(pred_score, 2)}/5")
+pred = model.predict(X_pred)[0]
+print(f"⭐ Note prédite : {round(pred, 2)}/5 pour un prof de {prof_domain} enseignant {course_domain}")
 
 # ==========================================
 # 💾 SAUVEGARDE ET TÉLÉCHARGEMENT DU MODÈLE
